@@ -1,0 +1,113 @@
+.animated-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 40px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: white;
+    text-decoration: none;
+    border: 1px solid white;
+    border-radius: 30px;
+    background: linear-gradient(90deg, #020022 0%, #04003E 33%, #04003E 65%, #020022 100%);
+    overflow: hidden;
+    z-index: 1;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: none;
+}
+
+.animated-button img {
+    height: 20px;
+    margin-right: 10px;
+}
+
+.animated-button:hover {
+    background: #140F51;
+    box-shadow: 0 0 8px white, 0 0 15px white;
+}
+
+.animated-button span {
+    will-change: transform;
+    position: absolute;
+    display: block;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.animated-button:hover span:nth-child(1) {
+    opacity: 1;
+    animation: animate1 2s linear infinite;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+}
+
+.animated-button:hover span:nth-child(2) {
+    opacity: 1;
+    animation: animate2 2s linear infinite;
+    top: -100%;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    animation-delay: 0.5s;
+}
+
+.animated-button:hover span:nth-child(3) {
+    opacity: 1;
+    animation: animate3 2s linear infinite;
+    bottom: 0;
+    right: -100%;
+    width: 100%;
+    height: 2px;
+}
+
+.animated-button:hover span:nth-child(4) {
+    opacity: 1;
+    animation: animate4 2s linear infinite;
+    bottom: -100%;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    animation-delay: 0.5s;
+}
+
+@keyframes animate1 {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+@keyframes animate2 {
+    0% {
+        top: -100%;
+    }
+    100% {
+        top: 100%;
+    }
+}
+
+@keyframes animate3 {
+    0% {
+        right: -100%;
+    }
+    100% {
+        right: 100%;
+    }
+}
+
+@keyframes animate4 {
+    0% {
+        bottom: -100%;
+    }
+    100% {
+        bottom: 100%;
+    }
+}
