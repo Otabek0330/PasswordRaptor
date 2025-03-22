@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import "./BreachedPassword.css";
 import Button from "../components/Button";
 import sha1 from "crypto-js/sha1";
@@ -8,6 +8,10 @@ const BreachedPassword = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [breachResult, setBreachResult] = useState(null);
     const [checking, setChecking] = useState(false);
+
+    useEffect(() => {
+        document.title = "Password Raptor | Check Breached Passwords";
+    }, []);
 
     const checkPassword = async () => {
         if (!password) return;

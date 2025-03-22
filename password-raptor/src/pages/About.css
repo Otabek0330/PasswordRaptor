@@ -2,44 +2,49 @@
     padding: 20px;
     background: linear-gradient(90deg, #020022 0%, #04003E 25%, #060053 50%, #04003E 75%, #020022 100%);
     color: white;
-    min-height: 85.7vh;
+  }
+  
+  h2 {
     text-align: center;
-}
-
-h2 {
     font-size: 2rem;
     color: #00BFFF;
     margin-bottom: 1rem;
-}
-
-p {
+  }
+  
+  p {
+    text-align: center;
     font-size: 1.2rem;
     margin-bottom: 2rem;
     line-height: 1.6;
-}
-
-.faq-section {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: left;
-}
-
-h3 {
+  }
+  
+  h3 {
+    text-align: center;
     font-size: 1.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     color: #00BFFF;
-}
-
-.faq-list {
+  }
+  
+  .faq-section {
+    margin-bottom: 3rem;
+  }
+  
+  .faq-columns {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .faq-list {
     list-style: none;
     padding: 0;
-    margin: 0 auto;
-    max-width: 600px;
-}
-
-.faq-item {
+    margin: 0;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .faq-item {
     margin-bottom: 1rem;
     background-color: #020022;
     border-radius: 5px;
@@ -47,30 +52,49 @@ h3 {
     padding: 10px 15px;
     cursor: pointer;
     transition: background-color 0.3s;
-}
-
-.faq-item:hover {
+  }
+  
+  .faq-item:hover {
     background-color: #1a1a40;
-}
-
-.faq-question {
+  }
+  
+  .faq-question {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: #00BFFF;
     font-weight: bold;
-}
-
-.faq-answer {
+  }
+  
+  .faq-answer {
     margin-top: 10px;
     font-size: 1rem;
     color: white;
     line-height: 1.5;
-}
-
-.faq-toggle-icon {
+  }
+  
+  .faq-toggle-icon {
     font-size: 1.2rem;
     font-weight: bold;
     color: #00BFFF;
-}
+  }
+  
+  .contact-section {
+    margin: 0;
+  }
+  
+  .contact-section p {
+    margin: 0.5rem 0;
+  }
+  
+  .contact-section strong {
+    font-size: 1.1rem;
+    color: #00BFFF;
+  }
+  
+  .right {
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+  

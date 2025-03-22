@@ -17,11 +17,15 @@ const PersonalizedPassword = () => {
     const [isCopied, setIsCopied] = useState(false);
     const [isShuffling, setIsShuffling] = useState(false);
 
+    useEffect(() => {
+        document.title = "Password Raptor | Generate Personalized Password";
+      }, []);
+
     const addWord = () => {
         if (words.length < 7 && newWord.length >= 3 && newWord.length <= 14 && newWord.trim() !== "") {
             setWords([...words, newWord.trim()]);
             setNewWord('');
-            setHasGenerated(false); // Reset generated state
+            setHasGenerated(false);
         }
     };
 

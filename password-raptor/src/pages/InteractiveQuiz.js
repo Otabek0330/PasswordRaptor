@@ -41,6 +41,7 @@ const InteractiveQuiz = () => {
   const [disableShuffle, setDisableShuffle] = useState(false);
 
   useEffect(() => {
+    document.title = "Password Raptor | Password Generation Quiz";
     startNewQuiz();
   }, []);
 

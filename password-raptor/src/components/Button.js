@@ -5,7 +5,7 @@ const Button = ({ children, href, onClick, imgSrc, imgAlt, disabled }) => (
   <a
     href={href || "#"}
     onClick={(e) => {
-      e.preventDefault(); // Prevent navigation
+      e.preventDefault();
       if (!disabled && onClick) onClick(); // Call onClick only if not disabled
     }}
     className={`button animated-button ${disabled ? "disabled" : ""}`} // Add "disabled" class when disabled

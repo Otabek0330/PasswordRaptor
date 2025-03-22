@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import "./Home.css";
@@ -7,6 +7,10 @@ import generateImg from "../assets/images/generate.png";
 
 const Home = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = "Password Raptor | Home";
+  }, []);
 
   return (
     <section className="hero">
