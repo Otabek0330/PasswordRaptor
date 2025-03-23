@@ -17,37 +17,40 @@
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     box-shadow: none;
-}
-
-.animated-button img {
+    white-space: nowrap;
+  }
+  
+  .animated-button img {
     height: 20px;
+    width: 20px;
     margin-right: 10px;
-}
-
-.animated-button:hover {
+    object-fit: contain;
+  }
+  
+  .animated-button:hover {
     background: #140F51;
     box-shadow: 0 0 8px white, 0 0 15px white;
-}
-
-.animated-button span {
+  }
+  
+  .animated-button span {
     will-change: transform;
     position: absolute;
     display: block;
     background: white;
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
-}
-
-.animated-button:hover span:nth-child(1) {
+  }
+  
+  .animated-button:hover span:nth-child(1) {
     opacity: 1;
     animation: animate1 2s linear infinite;
     top: 0;
     left: -100%;
     width: 100%;
     height: 2px;
-}
-
-.animated-button:hover span:nth-child(2) {
+  }
+  
+  .animated-button:hover span:nth-child(2) {
     opacity: 1;
     animation: animate2 2s linear infinite;
     top: -100%;
@@ -55,18 +58,18 @@
     width: 2px;
     height: 100%;
     animation-delay: 0.5s;
-}
-
-.animated-button:hover span:nth-child(3) {
+  }
+  
+  .animated-button:hover span:nth-child(3) {
     opacity: 1;
     animation: animate3 2s linear infinite;
     bottom: 0;
     right: -100%;
     width: 100%;
     height: 2px;
-}
-
-.animated-button:hover span:nth-child(4) {
+  }
+  
+  .animated-button:hover span:nth-child(4) {
     opacity: 1;
     animation: animate4 2s linear infinite;
     bottom: -100%;
@@ -74,40 +77,80 @@
     width: 2px;
     height: 100%;
     animation-delay: 0.5s;
-}
-
-@keyframes animate1 {
+  }
+  
+  /* Animations */
+  @keyframes animate1 {
     0% {
-        left: -100%;
+      left: -100%;
     }
     100% {
-        left: 100%;
+      left: 100%;
     }
-}
-
-@keyframes animate2 {
+  }
+  
+  @keyframes animate2 {
     0% {
-        top: -100%;
+      top: -100%;
     }
     100% {
-        top: 100%;
+      top: 100%;
     }
-}
-
-@keyframes animate3 {
+  }
+  
+  @keyframes animate3 {
     0% {
-        right: -100%;
+      right: -100%;
     }
     100% {
-        right: 100%;
+      right: 100%;
     }
-}
-
-@keyframes animate4 {
+  }
+  
+  @keyframes animate4 {
     0% {
-        bottom: -100%;
+      bottom: -100%;
     }
     100% {
-        bottom: 100%;
+      bottom: 100%;
     }
-}
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 600px) {
+    .animated-button {
+      padding: 12px 24px;
+      font-size: 0.9rem;
+    }
+  
+    .animated-button img {
+      height: 18px;
+      width: 18px;
+      margin-right: 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .animated-button {
+      padding: 10px 5px;
+      font-size: 0.9rem;
+    }
+  
+    .animated-button img {
+      height: 16px;
+      margin-right: 6px;
+    }
+  }  
+  
+  @media (max-width: 400px) {
+    .animated-button {
+      padding: 7px 1px;
+      font-size: 0.85rem;
+      flex-wrap: nowrap;
+    }
+  
+    .animated-button img {
+      margin-right: 6px;
+    }
+  }
+  

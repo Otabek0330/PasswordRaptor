@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from "react-router-dom";
 import "./PasswordEvaluation.css";
 import Button from "../components/Button";
 import zxcvbn from "zxcvbn";
@@ -107,9 +108,8 @@ const PasswordEvaluation = () => {
     <div className="password-evaluation-container">
       <h2>Password Evaluation</h2>
       <p className="about-text">
-        Visit the <a href="/about" className="about-link">About</a> page to learn tips on creating strong passwords.
+        Visit the <Link to="/about" className="about-link">About</Link> page to learn tips on creating strong passwords.
       </p>
-
       <div className="password-input-wrapper">
         <form autoComplete="off" onSubmit={(e) => e.preventDefault()} className="password-input">
           <input

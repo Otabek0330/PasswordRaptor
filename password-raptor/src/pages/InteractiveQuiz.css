@@ -152,3 +152,71 @@
   75% { color: #f0e68c; }
   100% { color: #00bfff; }
 }
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .quiz-question,
+  .quiz-navigation,
+  .generated-password-container,
+  .password-length-slider {
+    width: 70%;
+  }
+
+  .quiz-navigation {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .quiz-question,
+  .quiz-navigation,
+  .generated-password-container,
+  .password-length-slider {
+    width: 90%;
+  }
+
+  .quiz-navigation {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .quiz-navigation button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .generated-password-container {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .quiz-question label {
+    font-size: 1rem;
+  }
+
+  .generated-password-container {
+    padding: 1rem;
+    font-size: 0.95rem;
+  }
+
+  .quiz-explanation {
+    font-size: 0.95rem;
+    max-width: 100%;
+  }
+
+  .button-group {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .button-group .button {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+
+  .password-length-slider {
+    font-size: 0.95rem;
+  }
+}

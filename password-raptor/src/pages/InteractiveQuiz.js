@@ -22,9 +22,6 @@ const questionsPool = [
   { question: "When were you born?", type: "number" }
 ];
 
-const strengthColors = ["red", "orange", "yellow", "lightblue", "blue"];
-const strengthLabels = ["Very Weak", "Weak", "Moderate", "Strong", "Very Strong"];
-
 const InteractiveQuiz = () => {
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -32,6 +29,8 @@ const InteractiveQuiz = () => {
   const [validationErrors, setValidationErrors] = useState(Array(5).fill(""));
   const [generatedPassword, setGeneratedPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState(null);
+  const [strengthLabel, setStrengthLabel] = useState("");
+  const [strengthColor, setStrengthColor] = useState("");
   const [passwordLength, setPasswordLength] = useState(12);
   const [copyIcon, setCopyIcon] = useState(copyImg);
   const [isCopied, setIsCopied] = useState(false);
@@ -45,6 +44,28 @@ const InteractiveQuiz = () => {
     startNewQuiz();
   }, []);
 
+  const evaluateStrength = (password) => {
+    const result = zxcvbn(password);
+    const crackTime = result.crack_times_seconds.offline_slow_hashing_1e4_per_second;
+
+    if (crackTime < 1e4) {
+      setStrengthLabel("Very Weak");
+      setStrengthColor("#ff4d4f");
+    } else if (crackTime < 1e6) {
+      setStrengthLabel("Weak");
+      setStrengthColor("#ff944d");
+    } else if (crackTime < 1e8) {
+      setStrengthLabel("Moderate");
+      setStrengthColor("#ffc107");
+    } else if (crackTime < 1e12) {
+      setStrengthLabel("Strong");
+      setStrengthColor("#3399ff");
+    } else {
+      setStrengthLabel("Very Strong");
+      setStrengthColor("#0066cc");
+    }
+  };
+
   const startNewQuiz = () => {
     const shuffled = [...questionsPool].sort(() => Math.random() - 0.5).slice(0, 5);
     setQuizQuestions(shuffled);
@@ -52,6 +73,8 @@ const InteractiveQuiz = () => {
     setValidationErrors(Array(5).fill(""));
     setGeneratedPassword("");
     setPasswordStrength(null);
+    setStrengthLabel("");
+    setStrengthColor("");
     setCurrentQuestionIndex(0);
     setQuizFinished(false);
     setDisableCopy(false);
@@ -91,26 +114,19 @@ const InteractiveQuiz = () => {
 
   const changeCurrentQuestion = () => {
     const currentQuestion = quizQuestions[currentQuestionIndex];
-
     const availableQuestions = questionsPool.filter(
       (q) =>
         !quizQuestions.some(existing => existing.question === q.question) &&
         q.question !== currentQuestion.question
     );
-
     if (availableQuestions.length === 0) return;
-
     const newQuestion = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
-
     const updatedQuestions = [...quizQuestions];
     updatedQuestions[currentQuestionIndex] = newQuestion;
-
     setQuizQuestions(updatedQuestions);
-
     const updatedAnswers = [...answers];
     updatedAnswers[currentQuestionIndex] = "";
     setAnswers(updatedAnswers);
-
     const updatedErrors = [...validationErrors];
     updatedErrors[currentQuestionIndex] = "";
     setValidationErrors(updatedErrors);
@@ -122,13 +138,11 @@ const InteractiveQuiz = () => {
       .map(ans => ans.substring(0, 7).replace(/\s/g, ""));
 
     let selectedWords = validAnswers.sort(() => Math.random() - 0.5).slice(0, 3);
-
     selectedWords = selectedWords.map(word =>
       Math.random() < 0.5 ? word.toUpperCase() : word.toLowerCase()
     );
 
     let passwordBase = selectedWords.join("");
-
     const symbols = "!@#$%^&*";
     let addedSymbols = "";
     while (addedSymbols.length < 3) {
@@ -137,7 +151,6 @@ const InteractiveQuiz = () => {
         addedSymbols += randomSymbol;
       }
     }
-
     for (let symbol of addedSymbols) {
       let insertIndex = Math.floor(Math.random() * passwordBase.length);
       passwordBase =
@@ -145,23 +158,21 @@ const InteractiveQuiz = () => {
         symbol +
         passwordBase.slice(insertIndex);
     }
-
     if (!/[A-Z]/.test(passwordBase)) {
       passwordBase += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
     }
     if (!/[a-z]/.test(passwordBase)) {
       passwordBase += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
     }
-
     const additionalChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     while (passwordBase.length < passwordLength) {
       passwordBase += additionalChars[Math.floor(Math.random() * additionalChars.length)];
     }
-
     passwordBase = passwordBase.slice(0, passwordLength);
-
     setGeneratedPassword(passwordBase);
-    setPasswordStrength(zxcvbn(passwordBase));
+    const result = zxcvbn(passwordBase);
+    setPasswordStrength(result);
+    evaluateStrength(passwordBase);
     setQuizFinished(true);
   };
 
@@ -169,7 +180,6 @@ const InteractiveQuiz = () => {
     if (!disableShuffle) {
       setDisableShuffle(true);
       setIsShuffling(true);
-
       const characterPool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
       const interval = setInterval(() => {
         let tempPassword = "";
@@ -178,7 +188,6 @@ const InteractiveQuiz = () => {
         }
         setGeneratedPassword(tempPassword);
       }, 30);
-
       setTimeout(() => {
         clearInterval(interval);
         generatePassword(passwordLength);
@@ -194,7 +203,6 @@ const InteractiveQuiz = () => {
       navigator.clipboard.writeText(generatedPassword);
       setCopyIcon(tickImg);
       setIsCopied(true);
-
       setTimeout(() => {
         setCopyIcon(copyImg);
         setIsCopied(false);
@@ -255,9 +263,9 @@ const InteractiveQuiz = () => {
           <div className="generated-password-container">
             <div className="generated-top">
               <p className={`generated-password ${isShuffling ? "shuffling" : ""}`}>{generatedPassword}</p>
-              {passwordStrength && (
-                <p className="password-strength" style={{ color: strengthColors[passwordStrength.score] }}>
-                  <strong>Strength: {strengthLabels[passwordStrength.score]}</strong>
+              {strengthLabel && (
+                <p className="password-strength" style={{ color: strengthColor }}>
+                  <strong>Strength: {strengthLabel}</strong>
                 </p>
               )}
             </div>
