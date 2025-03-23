@@ -59,7 +59,7 @@ const About = () => {
         },
         {
             question: "How to secure accounts and passwords?",
-            answer: "Account and password security is major concern of many companies. Although Password Raptor provides tools to generate and evaluate passwords, it does not guarantee security as there are other factors that contribute to account and password security. You can learn more about cybersecurity by searching for credible journals and articles from various sources."
+            answer: "Account and password security is major concern of many organizations. Although Password Raptor provides tools to generate and evaluate passwords, it does not guarantee security as there are other factors that contribute to account and password security. You can learn more about cybersecurity by searching for credible journals and articles from various sources."
         },
         {
             question: "Are passwords checked against known breaches?",
@@ -79,7 +79,7 @@ const About = () => {
         <div className="about-container">
             <h2>About Password Raptor</h2>
             <p>
-                Intelligent password analyzer that helps you evaluate and create memorable and strong passwords for a secure digital experience.
+                Password Raptor has various tools that helps you evaluate and create memorable and strong passwords for a secure digital experience.
             </p>
 
             <div className="faq-section">
