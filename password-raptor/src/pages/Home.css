@@ -129,7 +129,7 @@ body {
   }
 }
 
-@media (max-width: 550px) {
+@media (max-width: 480px) {
   .hero h2 {
     font-size: 1.8rem;
   }
@@ -151,6 +151,6 @@ body {
   }
 
   .copyright {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
   }
 }

@@ -252,7 +252,7 @@ const InteractiveQuiz = () => {
       {!quizFinished ? (
         <>
           <Button onClick={generatePassword} disabled={isFinishDisabled}>
-            Finish and Generate Password
+            Finish
           </Button>
           {isFinishDisabled && currentQuestionIndex === 4 && (
             <p className="warning-message">Please answer all questions correctly to enable this button.</p>
