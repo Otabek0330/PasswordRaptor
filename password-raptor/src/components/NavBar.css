@@ -6,6 +6,8 @@
   padding: 0 1rem;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.4);
   border-bottom: 1px solid #140F51;
+  position: relative;
+  z-index: 100;
 }
 
 .logo img {
@@ -33,7 +35,7 @@
 .nav-links a::after {
   content: "";
   position: absolute;
-  left: 0;
+  left: 25%;
   bottom: 5px;
   width: 0;
   height: 3px;
@@ -42,15 +44,26 @@
   transition: width 0.3s ease-in-out;
 }
 
-.nav-links a:hover::after {
-  width: 100%;
-}
-
+.nav-links a:hover::after,
 .nav-links a.active::after {
-  width: 100%;
+  width: 50%;
 }
 
-/* Responsive adjustments */
+/* Burger icon button, initially hidden */
+.burger-icon {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.burger-icon img {
+  height: 36px;
+  width: 36px;
+  object-fit: contain;
+}
+
+/* Keep your existing breakpoints untouched */
 @media (max-width: 1024px) {
   .nav-links a {
     font-size: 0.95rem;
@@ -86,13 +99,68 @@
   }
 }
 
+/* 🔥 Burger menu ONLY below 626px */
+@media (max-width: 626px) {
+  .topnav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .logo {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .burger-icon {
+    display: block;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background-color: #020022;
+    border-top: 1px solid #140F51;
+    padding: 10px 0;
+  }
+
+  .nav-links.show {
+    display: flex;
+  }
+
+  .nav-links a {
+    margin: 8px 0;
+    padding: 10px 16px;
+    font-size: 1rem;
+    text-align: center;
+    width: fit-content;
+  }
+
+  .nav-links a::after {
+    left: 25%;
+    width: 0;
+  }
+
+  .nav-links a:hover::after,
+  .nav-links a.active::after {
+    width: 50%;
+  }
+}
+
 @media (max-width: 480px) {
   .logo img {
     height: 60px;
   }
 
+  .burger-icon img {
+    height: 28px;
+    width: 28px;
+  }
+
   .nav-links a {
-    padding: 8px 10px;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 }

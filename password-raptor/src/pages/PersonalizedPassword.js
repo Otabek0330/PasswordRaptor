@@ -69,16 +69,26 @@ const PersonalizedPassword = () => {
         const count = Math.floor(Math.random() * (Math.min(10, shuffled.length) - 3 + 1)) + 3;
         const selected = shuffled.slice(0, count);
 
-        let password = selected.map(word => {
+        let password = "";
+
+        selected.forEach((word, index) => {
             if (word.length > 4 && Math.random() < 0.3) {
                 const split = Math.floor(word.length / 2);
                 const insert = Math.random() < 0.5
                     ? Math.floor(Math.random() * 10)
                     : "!@#$%^&*()"[Math.floor(Math.random() * 10)];
-                return word.slice(0, split) + insert + word.slice(split);
+                word = word.slice(0, split) + insert + word.slice(split);
             }
-            return word;
-        }).join(() => (Math.random() < 0.3 ? "!@#$%^&*()"[Math.floor(Math.random() * 10)] : "-"));
+
+            password += word;
+
+            if (index < selected.length - 1) {
+                const separator = Math.random() < 0.3
+                    ? "!@#$%^&*()"[Math.floor(Math.random() * 10)]
+                    : "-";
+                password += separator;
+            }
+        });
 
         if (Math.random() < 0.5) {
             password = password.toUpperCase();
