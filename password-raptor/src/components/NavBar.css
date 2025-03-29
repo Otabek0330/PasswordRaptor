@@ -49,7 +49,6 @@
   width: 50%;
 }
 
-/* Burger icon button, initially hidden */
 .burger-icon {
   display: none;
   background: none;
@@ -63,7 +62,6 @@
   object-fit: contain;
 }
 
-/* Keep your existing breakpoints untouched */
 @media (max-width: 1024px) {
   .nav-links a {
     font-size: 0.95rem;
@@ -99,7 +97,6 @@
   }
 }
 
-/* 🔥 Burger menu ONLY below 626px */
 @media (max-width: 626px) {
   .topnav {
     flex-direction: column;
