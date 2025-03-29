@@ -123,6 +123,7 @@ body {
   }
 
   .copyright {
+    font-size: 0.6rem;
     position: static;
     margin-top: 2rem;
     transform: none;
