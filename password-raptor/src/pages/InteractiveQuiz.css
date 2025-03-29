@@ -155,6 +155,10 @@
 
 /* Responsive Breakpoints */
 @media (max-width: 1024px) {
+  .quiz-question input {
+    width: 90%;
+  }
+
   .quiz-question,
   .quiz-navigation,
   .generated-password-container,
@@ -168,11 +172,15 @@
 }
 
 @media (max-width: 768px) {
+  .quiz-question input {
+    width: 90%;
+  }
+
   .quiz-question,
   .quiz-navigation,
   .generated-password-container,
   .password-length-slider {
-    width: 90%;
+    width: 80%;
   }
 
   .quiz-navigation {
@@ -191,6 +199,14 @@
 }
 
 @media (max-width: 480px) {
+  .interactive-quiz-container a {
+    width: 50%;
+  }
+
+  .quiz-question input {
+    width: 90%;
+  }
+
   .quiz-question label {
     font-size: 1rem;
   }
@@ -202,7 +218,7 @@
 
   .quiz-explanation {
     font-size: 0.95rem;
-    max-width: 100%;
+    width: 100%;
   }
 
   .button-group {
