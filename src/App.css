@@ -1,0 +1,18 @@
+.app {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.app__main {
+  flex: 1;
+  padding-top: var(--nav-h);
+  display: flex;
+  flex-direction: column;
+}
+
+.app__main > * {
+  flex: 1;
+}
