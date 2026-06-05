@@ -1,6 +1,6 @@
 // ===========================
-//  Password Raptor — Generators v2
-//  Bundled wordlist — no external file dependency
+//  Password Raptor — Generators v3
+//  Fixes: rejection sampling (#6), batched crypto for bulk (#20)
 // ===========================
 
 export const BUNDLED_WORDS = [
@@ -47,7 +47,7 @@ export const BUNDLED_WORDS = [
   'wedge','weigh','weird','whisk','white','whole','windy','witty','world','worth',
   'wrath','write','yacht','yearn','yield','young','zebra','zesty','baron','blaze',
   'brave','brine','brisk','canal','chalk','cinch','civic','cloak','coast','cobalt',
-  'crest','crimp','cubic','denim','depth','depot','digit','disco','diver','doubt',
+  'crest','crimp','cubic','denim','depot','digit','disco','diver','doubt',
 ];
 
 const CHARS = {
@@ -57,16 +57,41 @@ const CHARS = {
   symbols: '!@#$%^&*()-_=+[]{}|;:,.<>?',
 };
 
+// Fix #6 — rejection sampling eliminates modulo bias entirely
 function secureRandInt(max) {
+  // Largest multiple of max that fits in Uint32 range
+  const limit = Math.floor(0x100000000 / max) * max;
   const arr = new Uint32Array(1);
-  crypto.getRandomValues(arr);
+  do {
+    crypto.getRandomValues(arr);
+  } while (arr[0] >= limit);
   return arr[0] % max;
 }
 
-function shuffle(arr) {
+// Fix #20 — batched random buffer for high-throughput generation
+class RandBuffer {
+  constructor(size = 512) {
+    this._buf = new Uint32Array(size);
+    this._pos = size; // force refill on first use
+  }
+  _refill() {
+    crypto.getRandomValues(this._buf);
+    this._pos = 0;
+  }
+  next(max) {
+    const limit = Math.floor(0x100000000 / max) * max;
+    while (true) {
+      if (this._pos >= this._buf.length) this._refill();
+      const x = this._buf[this._pos++];
+      if (x < limit) return x % max;
+    }
+  }
+}
+
+function shuffle(arr, rb) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
-    const j = secureRandInt(i + 1);
+    const j = rb ? rb.next(i + 1) : secureRandInt(i + 1);
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -103,30 +128,36 @@ export function generatePassphrase({ wordList, wordCount = 4, separator = '-', c
       case 'random': word = word.split('').map(c => secureRandInt(2) ? c.toUpperCase() : c.toLowerCase()).join(''); break;
       default: word = word.toLowerCase();
     }
-    if (injectNumbers) { const d = secureRandInt(10).toString(); const p = secureRandInt(word.length + 1); word = word.slice(0,p)+d+word.slice(p); }
-    if (injectSymbols) { const s = '!@#$%^&*'[secureRandInt(8)]; word = secureRandInt(2) ? s+word : word+s; }
+    if (injectNumbers) { const d = secureRandInt(10).toString(); const p = secureRandInt(word.length + 1); word = word.slice(0, p) + d + word.slice(p); }
+    if (injectSymbols) { const s = '!@#$%^&*'[secureRandInt(8)]; word = secureRandInt(2) ? s + word : word + s; }
     words.push(word);
   }
   return words.join(separator);
 }
 
 // ---------- Custom ----------
-export function generateCustom({ words, length = 16, separator = '-' }) {
-  if (!words || words.length < 2) return 'Add at least 2 words';
+// Fix #15 — don't silently truncate; return natural length and flag if capped
+export function generateCustom({ words, length = 20, separator = '-' }) {
+  if (!words || words.length < 2) return { password: 'Add at least 2 words', truncated: false, actualLength: 0 };
   const shuffled = shuffle(words);
   const mutated = shuffled.map(word => {
     let w = word;
     const r = secureRandInt(4);
     if (r === 0) w = w.toUpperCase();
     else if (r === 1) w = w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-    else if (r === 2) { const pos = Math.floor(w.length/2); w = w.slice(0,pos)+secureRandInt(10)+w.slice(pos); }
+    else if (r === 2) { const pos = Math.floor(w.length / 2); w = w.slice(0, pos) + secureRandInt(10) + w.slice(pos); }
     return w;
   });
-  let password = mutated.join(separator);
-  if (password.length > length) return password.slice(0, length);
-  const pool = CHARS.lower + CHARS.digits;
-  while (password.length < length) password += pool[secureRandInt(pool.length)];
-  return password;
+  const natural = mutated.join(separator);
+  if (natural.length <= length) {
+    // Pad with random chars if shorter
+    const pool = CHARS.lower + CHARS.digits;
+    let padded = natural;
+    while (padded.length < length) padded += pool[secureRandInt(pool.length)];
+    return { password: padded, truncated: false, actualLength: padded.length };
+  }
+  // Natural join is longer than limit — return natural, flag as uncapped
+  return { password: natural, truncated: true, actualLength: natural.length };
 }
 
 // ---------- Memorable ----------
@@ -136,18 +167,16 @@ export function generateMemorable({ sentence, mixCase = true, addNumbers = true,
   let initials = words.map(w => w.replace(/[^a-zA-Z0-9]/g, '').charAt(0) || '').join('');
   if (!initials) return '';
   if (l33t) {
-    initials = initials.replace(/a/gi,'@').replace(/e/gi,'3').replace(/i/gi,'1').replace(/o/gi,'0').replace(/s/gi,'$');
+    initials = initials.replace(/a/gi, '@').replace(/e/gi, '3').replace(/i/gi, '1').replace(/o/gi, '0').replace(/s/gi, '$');
   } else if (mixCase) {
-    initials = initials.split('').map((c,i) => i%2===0 ? c.toUpperCase() : c.toLowerCase()).join('');
+    initials = initials.split('').map((c, i) => i % 2 === 0 ? c.toUpperCase() : c.toLowerCase()).join('');
   }
   if (addNumbers) {
     const num = (10 + secureRandInt(90)).toString();
     const pos = Math.floor(initials.length / 2);
-    initials = initials.slice(0,pos) + num + initials.slice(pos);
+    initials = initials.slice(0, pos) + num + initials.slice(pos);
   }
-  if (addSymbols) {
-    initials += '!@#$%^&*'[secureRandInt(8)];
-  }
+  if (addSymbols) initials += '!@#$%^&*'[secureRandInt(8)];
   return initials;
 }
 
@@ -156,9 +185,29 @@ export function generatePIN(length = 6) {
   return Array.from({ length }, () => secureRandInt(10).toString()).join('');
 }
 
-// ---------- Bulk ----------
-export function generateBulk({ count = 10, ...opts }) {
-  return Array.from({ length: count }, () => generateRandom(opts));
+// ---------- Bulk — Fix #20: single large crypto batch ----------
+export function generateBulk({ count = 10, length = 16, upper = true, lower = true, digits = true, symbols = true }) {
+  let pool = '';
+  if (upper)   pool += CHARS.upper;
+  if (lower)   pool += CHARS.lower;
+  if (digits)  pool += CHARS.digits;
+  if (symbols) pool += CHARS.symbols;
+  if (!pool) return Array(count).fill('Select at least one option');
+
+  const rb = new RandBuffer(Math.max(512, count * length * 3));
+  const results = [];
+
+  for (let p = 0; p < count; p++) {
+    const required = [];
+    if (upper)   required.push(CHARS.upper[rb.next(CHARS.upper.length)]);
+    if (lower)   required.push(CHARS.lower[rb.next(CHARS.lower.length)]);
+    if (digits)  required.push(CHARS.digits[rb.next(CHARS.digits.length)]);
+    if (symbols) required.push(CHARS.symbols[rb.next(CHARS.symbols.length)]);
+    const chars = [...required];
+    for (let i = required.length; i < length; i++) chars.push(pool[rb.next(pool.length)]);
+    results.push(shuffle(chars, rb).join(''));
+  }
+  return results;
 }
 
 // ---------- Load external dictionary (optional) ----------

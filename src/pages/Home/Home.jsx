@@ -1,43 +1,36 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Wand2,
-  ShieldCheck,
-  Search,
-  Info,
-  ArrowRight,
-  Lock,
-} from "lucide-react";
-import "./Home.css";
+import React, { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Wand2, ShieldCheck, Search, ArrowRight, Lock } from 'lucide-react';
+import './Home.css';
 
 const FEATURES = [
   {
     icon: Wand2,
-    title: "Password Creation",
-    desc: "Generate random passwords, passphrases, or custom word-based passwords with full control over character sets and length.",
-    path: "/create",
-    badge: "Generator",
+    title: 'Password Creation',
+    desc: 'Generate random passwords, passphrases, memorable passwords, or custom word-based passwords — with full control over character sets and length.',
+    path: '/create',
+    badge: 'Generator',
   },
   {
     icon: ShieldCheck,
-    title: "Strength Evaluation",
-    desc: "Evaluate any password using entropy analysis, pattern detection, and realistic crack-time estimates across attack scenarios.",
-    path: "/evaluate",
-    badge: "Evaluator",
+    title: 'Strength Evaluation',
+    desc: 'Evaluate any password using entropy analysis, pattern detection, and realistic crack-time estimates across three attack scenarios.',
+    path: '/evaluate',
+    badge: 'Evaluator',
   },
   {
     icon: Search,
-    title: "Breach Check",
-    desc: "Check if a password or email has appeared in known data breaches using the HaveIBeenPwned database with full k-anonymity privacy.",
-    path: "/breach",
-    badge: "Breach Intel",
+    title: 'Breach Check',
+    desc: 'Check if a password or email has appeared in known data breaches using the HaveIBeenPwned database with full k-anonymity privacy.',
+    path: '/breach',
+    badge: 'Breach Intel',
   },
 ];
 
 const STATS = [
-  { value: "10B+", label: "Breached records in HIBP" },
-  { value: "128-bit", label: "Target entropy for very strong passwords" },
-  { value: "0", label: "Passwords stored or sent to our servers" },
+  { value: '10B+',    label: 'Breached records in HIBP' },
+  { value: '128-bit', label: 'Target entropy for very strong passwords' },
+  { value: '0',       label: 'Passwords stored or sent to our servers' },
 ];
 
 export default function Home() {
@@ -45,13 +38,14 @@ export default function Home() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    document.title = "Password Raptor";
+    document.title = 'Password Raptor';
     const t = setTimeout(() => setVisible(true), 50);
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <div className={`home ${visible ? "home--visible" : ""}`}>
+    <div className={`home ${visible ? 'home--visible' : ''}`}>
+
       {/* ── HERO ── */}
       <section className="home__hero" aria-label="Hero">
         <div className="home__hero-glow" aria-hidden="true" />
@@ -65,23 +59,22 @@ export default function Home() {
           <h1 className="home__title">
             Protect your
             <span className="home__title-accent"> digital identity</span>
-            <br />
-            with intelligent password tools.
+            <br />with intelligent password tools.
           </h1>
 
           <p className="home__subtitle">
-            Generate strong passwords, evaluate your current ones, and check if
-            they've been exposed in data breaches — all without leaving your
-            browser.
+            Generate unbreakable passwords, evaluate your current ones against
+            real-world attack scenarios, and check if they've been exposed in
+            data breaches — all without leaving your browser.
           </p>
 
           <div className="home__cta">
-            <button className="btn-primary" onClick={() => navigate("/create")}>
+            <button className="btn-primary" onClick={() => navigate('/create')}>
               <Wand2 size={16} />
               Start Generating
               <ArrowRight size={16} />
             </button>
-            <button className="btn-ghost" onClick={() => navigate("/evaluate")}>
+            <button className="btn-ghost" onClick={() => navigate('/evaluate')}>
               Evaluate a Password
             </button>
           </div>
@@ -93,9 +86,7 @@ export default function Home() {
             <span className="home__terminal-dot home__terminal-dot--red" />
             <span className="home__terminal-dot home__terminal-dot--yellow" />
             <span className="home__terminal-dot home__terminal-dot--green" />
-            <span className="home__terminal-title">
-              raptor — entropy analysis
-            </span>
+            <span className="home__terminal-title">raptor — entropy analysis</span>
           </div>
           <div className="home__terminal-body">
             <TerminalLines />
@@ -150,40 +141,47 @@ export default function Home() {
           <ShieldCheck size={20} />
           <div>
             <strong>Your data never leaves your device.</strong>
-            <span>
-              {" "}
-              Password generation and strength evaluation run entirely in your
-              browser. Breach lookups use k-anonymity — only a 5-character hash
-              prefix is sent to the API, never your full password.
-            </span>
+            <span> Password generation and strength evaluation run entirely in your browser.
+              Breach lookups use k-anonymity — only a 5-character hash prefix is sent to the API, never your full password.</span>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
 
-// Animated terminal lines component
 const LINES = [
-  { delay: 0, text: '$ raptor evaluate "MyP@ssw0rd"', color: "green" },
-  { delay: 800, text: "  Entropy          →  42.3 bits", color: "dim" },
-  { delay: 1200, text: "  Strength         →  Fair", color: "warn" },
-  { delay: 1600, text: "  Crack (offline)  →  3 hours", color: "warn" },
-  { delay: 2100, text: "  Keyboard pattern →  detected", color: "danger" },
-  { delay: 2600, text: "  Suggestion       →  add length", color: "dim" },
-  { delay: 3200, text: "", color: "dim" },
-  { delay: 3300, text: "$ raptor generate --length 20 --all", color: "green" },
-  { delay: 4100, text: "  $Kz9#mLqR2@vN!pXj7&", color: "bright" },
-  { delay: 4600, text: "  Entropy          →  131.4 bits", color: "dim" },
-  { delay: 5000, text: "  Strength         →  Very Strong ✓", color: "safe" },
+  { delay: 0,    text: '$ raptor evaluate "MyP@ssw0rd"',     color: 'green'  },
+  { delay: 800,  text: '  Entropy          →  42.3 bits',     color: 'dim'    },
+  { delay: 1200, text: '  Strength         →  Fair',          color: 'warn'   },
+  { delay: 1600, text: '  Crack (offline)  →  3 hours',       color: 'warn'   },
+  { delay: 2100, text: '  Keyboard pattern →  detected',      color: 'danger' },
+  { delay: 2600, text: '  Suggestion       →  add length',    color: 'dim'    },
+  { delay: 3200, text: '',                                     color: 'dim'    },
+  { delay: 3300, text: '$ raptor generate --length 20 --all', color: 'green'  },
+  { delay: 4100, text: '  $Kz9#mLqR2@vN!pXj7&',             color: 'bright' },
+  { delay: 4600, text: '  Entropy          →  131.4 bits',    color: 'dim'    },
+  { delay: 5000, text: '  Strength         →  Very Strong ✓', color: 'safe'   },
 ];
 
+// Fix #21 — isMounted ref prevents setState after unmount
 function TerminalLines() {
-  const [shown, setShown] = useState(0);
+  const [shown, setShown]       = useState(0);
+  const isMountedRef            = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   useEffect(() => {
     const timers = LINES.map(({ delay }, i) =>
-      setTimeout(() => setShown((s) => Math.max(s, i + 1)), delay),
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          setShown(s => Math.max(s, i + 1));
+        }
+      }, delay)
     );
     return () => timers.forEach(clearTimeout);
   }, []);
@@ -191,10 +189,7 @@ function TerminalLines() {
   return (
     <>
       {LINES.slice(0, shown).map((line, i) => (
-        <div
-          key={i}
-          className={`home__terminal-line home__terminal-line--${line.color}`}
-        >
+        <div key={i} className={`home__terminal-line home__terminal-line--${line.color}`}>
           {line.text}
         </div>
       ))}

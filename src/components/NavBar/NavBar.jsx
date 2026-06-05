@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import ThemeToggle from '../ThemeToggle/ThemeToggle.jsx';
@@ -13,10 +13,23 @@ const NAV_LINKS = [
   { path: '/about',     label: 'About'        },
 ];
 
+// Fix #18 — all focusable element selectors
+const FOCUSABLE = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
 export default function NavBar() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const burgerRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -24,16 +37,71 @@ export default function NavBar() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Close menu on route change
   useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
+  // Prevent body scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [menuOpen]);
 
+  // Fix #18 — focus trap inside mobile menu
+  const handleMenuKeyDown = useCallback((e) => {
+    if (!menuOpen) return;
+
+    // Escape closes the menu and returns focus to burger
+    if (e.key === 'Escape') {
+      setMenuOpen(false);
+      burgerRef.current?.focus();
+      return;
+    }
+
+    // Tab / Shift+Tab cycle only within the menu
+    if (e.key === 'Tab') {
+      const menu = mobileMenuRef.current;
+      if (!menu) return;
+
+      const focusable = Array.from(menu.querySelectorAll(FOCUSABLE));
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last  = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        // Shift+Tab: if on first element, wrap to last
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        // Tab: if on last element, wrap to first
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  }, [menuOpen]);
+
+  // Move focus into menu when it opens
+  useEffect(() => {
+    if (menuOpen && mobileMenuRef.current) {
+      const focusable = mobileMenuRef.current.querySelectorAll(FOCUSABLE);
+      if (focusable.length > 0) {
+        // Small delay so the menu transition completes
+        setTimeout(() => focusable[0].focus(), 50);
+      }
+    }
+  }, [menuOpen]);
+
   return (
     <>
-      <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`} aria-label="Main navigation">
+      <nav
+        className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}
+        aria-label="Main navigation"
+        onKeyDown={handleMenuKeyDown}
+      >
         <div className="navbar__inner">
           <Link to="/" className="navbar__logo" aria-label="Password Raptor — Home">
             <img src="/favicon.ico" alt="Password Raptor" className="navbar__logo-img" />
@@ -56,6 +124,7 @@ export default function NavBar() {
           <div className="navbar__right">
             <ThemeToggle />
             <button
+              ref={burgerRef}
               className="navbar__burger"
               onClick={() => setMenuOpen(v => !v)}
               aria-expanded={menuOpen}
@@ -68,10 +137,15 @@ export default function NavBar() {
         </div>
       </nav>
 
+      {/* Fix #18 — mobile menu with ref for focus trap */}
       <div
         id="mobile-menu"
+        ref={mobileMenuRef}
         className={`navbar__mobile ${menuOpen ? 'navbar__mobile--open' : ''}`}
         aria-hidden={!menuOpen}
+        role="dialog"
+        aria-label="Navigation menu"
+        aria-modal="true"
       >
         <ul role="list">
           {NAV_LINKS.map(({ path, label }) => (
@@ -80,6 +154,7 @@ export default function NavBar() {
                 to={path}
                 className={`navbar__mobile-link ${location.pathname === path ? 'navbar__mobile-link--active' : ''}`}
                 onClick={() => setMenuOpen(false)}
+                tabIndex={menuOpen ? 0 : -1}
               >
                 {label}
               </Link>
@@ -89,7 +164,11 @@ export default function NavBar() {
       </div>
 
       {menuOpen && (
-        <div className="navbar__overlay" onClick={() => setMenuOpen(false)} aria-hidden="true" />
+        <div
+          className="navbar__overlay"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
       )}
     </>
   );

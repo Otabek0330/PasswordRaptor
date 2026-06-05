@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 /* ===== LOGO ===== */
@@ -48,7 +48,7 @@
 .navbar__links {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.1rem;
   list-style: none;
   flex: 1;
   justify-content: center;
@@ -59,8 +59,8 @@
   display: flex;
   align-items: center;
   flex-direction: column;
-  padding: 0.45rem 0.85rem;
-  font-size: 0.875rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.82rem;
   font-weight: 500;
   color: var(--text-2);
   text-decoration: none;
@@ -70,10 +70,11 @@
 }
 .navbar__link:hover { color: var(--text-1); background: var(--border-subtle); }
 .navbar__link--active { color: var(--green-400); }
+[data-theme="light"] .navbar__link--active { color: var(--green-500); }
 
 .navbar__link-dot {
   position: absolute;
-  bottom: 4px;
+  bottom: 3px;
   width: 4px; height: 4px;
   border-radius: 50%;
   background: var(--green-500);
@@ -87,7 +88,7 @@
   box-shadow: var(--glow-xs);
 }
 
-/* ===== RIGHT SECTION (toggle + burger) ===== */
+/* ===== RIGHT SECTION ===== */
 .navbar__right {
   display: flex;
   align-items: center;
@@ -152,6 +153,7 @@
   background: var(--bg-card);
   border-color: var(--border-default);
 }
+[data-theme="light"] .navbar__mobile-link--active { color: var(--green-500); }
 
 /* ===== OVERLAY ===== */
 .navbar__overlay {
@@ -163,8 +165,17 @@
   z-index: 998;
 }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
+/* ===== RESPONSIVE =====
+   Fix #5 — moved breakpoint from 768px → 1024px
+   because 6 links overflow around 900px
+   ======================== */
+@media (max-width: 1024px) {
   .navbar__links { display: none; }
   .navbar__burger { display: flex; }
+}
+
+/* Tighten inner gap slightly on medium screens before burger kicks in */
+@media (min-width: 1025px) and (max-width: 1200px) {
+  .navbar__inner { gap: 1rem; }
+  .navbar__link  { padding: 0.4rem 0.5rem; font-size: 0.78rem; }
 }

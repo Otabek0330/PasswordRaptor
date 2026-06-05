@@ -25,7 +25,7 @@ const FAQS = [
   },
   {
     q: 'Are passphrases secure?',
-    a: 'Yes — extremely so when using 4+ random words. A 4-word passphrase from a 256-word list has ~32 bits of entropy. With 5+ words from a larger list you reach 60+ bits, which is very strong. Passphrases are also far easier to memorise than random character strings.',
+    a: 'Yes — extremely so when using 4+ random words. A 4-word passphrase from a 256-word list has ~32 bits of entropy. With 5+ words you reach 60+ bits, which is very strong. Passphrases are also far easier to memorise than random character strings.',
   },
   {
     q: 'Should I use different passwords on every site?',
@@ -37,7 +37,7 @@ const FAQS = [
   },
   {
     q: 'What is the email breach check doing?',
-    a: 'Email lookups query the HaveIBeenPwned database to identify which known data breaches involved your email address. This requires a paid HIBP API key for direct lookup. If unavailable, we display the full public breach database so you can cross-reference services you\'ve used.',
+    a: 'Email lookups query the HaveIBeenPwned database to identify which known data breaches involved your email address. A paid HIBP API key is required for direct lookup. Without one, we display the full public breach database so you can cross-reference services you\'ve used.',
   },
   {
     q: 'Is Password Raptor free?',
@@ -79,14 +79,14 @@ const MYTHS = [
 ];
 
 const PRINCIPLES = [
-  { icon: Lock,        title: 'Local-First',    desc: 'All computation runs in your browser. Your passwords are never transmitted.' },
-  { icon: ShieldCheck, title: 'k-Anonymity',    desc: 'Breach checks use k-anonymity — only hash prefixes are shared, never your full password.' },
-  { icon: Zap,         title: 'Entropy-Based',  desc: 'Strength evaluation uses information theory — entropy bits, not just character rules.' },
-  { icon: Globe,       title: 'No Tracking',    desc: 'No analytics, no cookies, no telemetry. Zero data collection of any kind.' },
+  { icon: Lock,        title: 'Local-First',   desc: 'All computation runs in your browser. Your passwords are never transmitted.' },
+  { icon: ShieldCheck, title: 'k-Anonymity',   desc: 'Breach checks use k-anonymity — only hash prefixes are shared, never your full password.' },
+  { icon: Zap,         title: 'Entropy-Based', desc: 'Strength evaluation uses information theory — entropy bits, not just character rules.' },
+  { icon: Globe,       title: 'No Tracking',   desc: 'No analytics, no cookies, no telemetry. Zero data collection of any kind.' },
 ];
 
 export default function About() {
-  const [openFaq, setOpenFaq]   = useState(null);
+  const [openFaq,  setOpenFaq]  = useState(null);
   const [openMyth, setOpenMyth] = useState(null);
 
   useEffect(() => {
@@ -130,32 +130,54 @@ export default function About() {
           <p className="about__section-sub">Common beliefs that make passwords weaker, not stronger.</p>
         </div>
         <div className="about__myths-grid">
-          {MYTHS.map((item, i) => (
-            <div
-              key={i}
-              className={`about__myth-card ${openMyth === i ? 'about__myth-card--open' : ''}`}
-              onClick={() => setOpenMyth(openMyth === i ? null : i)}
-            >
-              <div className="about__myth-header">
-                <span className="about__myth-emoji">{item.icon}</span>
-                <div className="about__myth-content">
-                  <div className="about__myth-label">
-                    <span className="about__myth-tag about__myth-tag--myth"><X size={10} /> Myth</span>
-                    <span className="about__myth-text">"{item.myth}"</span>
-                  </div>
-                  {openMyth === i && (
-                    <div className="about__myth-reality">
-                      <span className="about__myth-tag about__myth-tag--reality"><Check size={10} /> Reality</span>
-                      <p>{item.reality}</p>
+          {MYTHS.map((item, i) => {
+            // Fix #17 — stable IDs for aria-controls
+            const mythId    = `myth-${i}`;
+            const answerId  = `myth-answer-${i}`;
+            const isOpen    = openMyth === i;
+            return (
+              <div
+                key={i}
+                className={`about__myth-card ${isOpen ? 'about__myth-card--open' : ''}`}
+              >
+                <button
+                  id={mythId}
+                  className="about__myth-header"
+                  onClick={() => setOpenMyth(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  aria-controls={answerId}
+                >
+                  <span className="about__myth-emoji" aria-hidden="true">{item.icon}</span>
+                  <div className="about__myth-content">
+                    <div className="about__myth-label">
+                      <span className="about__myth-tag about__myth-tag--myth" aria-hidden="true">
+                        <X size={10} /> Myth
+                      </span>
+                      <span className="about__myth-text">"{item.myth}"</span>
                     </div>
-                  )}
-                </div>
-                <span className="about__myth-chevron">
-                  {openMyth === i ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-                </span>
+                  </div>
+                  <span className="about__myth-chevron" aria-hidden="true">
+                    {isOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+                  </span>
+                </button>
+
+                {/* Fix #17 — id matches aria-controls */}
+                {isOpen && (
+                  <div
+                    id={answerId}
+                    className="about__myth-reality"
+                    role="region"
+                    aria-labelledby={mythId}
+                  >
+                    <span className="about__myth-tag about__myth-tag--reality">
+                      <Check size={10} /> Reality
+                    </span>
+                    <p>{item.reality}</p>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -166,17 +188,41 @@ export default function About() {
           <p className="about__section-sub">Security questions, answered honestly.</p>
         </div>
         <div className="about__faq-list">
-          {FAQS.map((item, i) => (
-            <div key={i} className={`about__faq-item ${openFaq === i ? 'about__faq-item--open' : ''}`}>
-              <button className="about__faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)} aria-expanded={openFaq === i}>
-                <span>{item.q}</span>
-                {openFaq === i ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </button>
-              {openFaq === i && (
-                <div className="about__faq-a">{item.a}</div>
-              )}
-            </div>
-          ))}
+          {FAQS.map((item, i) => {
+            // Fix #17 — stable IDs for aria pairing
+            const btnId    = `faq-btn-${i}`;
+            const panelId  = `faq-panel-${i}`;
+            const isOpen   = openFaq === i;
+            return (
+              <div
+                key={i}
+                className={`about__faq-item ${isOpen ? 'about__faq-item--open' : ''}`}
+              >
+                <button
+                  id={btnId}
+                  className="about__faq-q"
+                  onClick={() => setOpenFaq(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                >
+                  <span>{item.q}</span>
+                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {/* Fix #17 — id + role + aria-labelledby */}
+                {isOpen && (
+                  <div
+                    id={panelId}
+                    className="about__faq-a"
+                    role="region"
+                    aria-labelledby={btnId}
+                  >
+                    {item.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 

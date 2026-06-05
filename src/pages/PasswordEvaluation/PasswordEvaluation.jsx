@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ShieldAlert, ShieldCheck, ShieldX, Zap, Clock, Info, GitCompare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, EyeOff, ShieldAlert, ShieldCheck, ShieldX, Zap, Clock, Info, GitCompare, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import { evaluatePassword } from '../../utils/passwordStrength.js';
 import { useToast } from '../../context/ToastContext.jsx';
 import './PasswordEvaluation.css';
 
 const STRENGTH_ICONS = [ShieldX, ShieldAlert, ShieldAlert, ShieldCheck, ShieldCheck];
 const CRACK_SCENARIOS = {
-  online:       { label: 'Online Attack',        sub: 'Rate-limited login (10/sec)',      icon: '🌐' },
-  offline_slow: { label: 'Offline (Secure Hash)', sub: 'bcrypt / Argon2 (10k/sec)',       icon: '🛡️' },
-  offline_fast: { label: 'Offline (Weak Hash)',   sub: 'MD5 / SHA-1 via GPU (10B/sec)',   icon: '⚡' },
+  online:       { label: 'Online Attack',         sub: 'Rate-limited login (10/sec)',     icon: '🌐' },
+  offline_slow: { label: 'Offline (Secure Hash)',  sub: 'bcrypt / Argon2 (10k/sec)',      icon: '🛡️' },
+  offline_fast: { label: 'Offline (Weak Hash)',    sub: 'MD5 / SHA-1 via GPU (10B/sec)',  icon: '⚡' },
 };
 
 function getCrackColor(t) {
@@ -19,19 +19,20 @@ function getCrackColor(t) {
   return 'var(--safe)';
 }
 
-// ── Entropy Visualizer state ──
 const VIZ_PRESETS = [8, 12, 16, 20, 24, 32];
 
 export default function PasswordEvaluation() {
   const { showToast } = useToast();
   const navigate = useNavigate();
   const inputRef = useRef(null);
-  const [password, setPassword]   = useState('');
-  const [showPw, setShowPw]       = useState(false);
-  const [result, setResult]       = useState(null);
+
+  const [password, setPassword]         = useState('');
+  const [showPw, setShowPw]             = useState(false);
+  const [copied, setCopied]             = useState(false);
+  const [result, setResult]             = useState(null);
   const [showBreakdown, setShowBreakdown] = useState(false);
 
-  // Entropy visualizer controls
+  // Entropy visualizer
   const [vizUpper,   setVizUpper]   = useState(true);
   const [vizLower,   setVizLower]   = useState(true);
   const [vizDigits,  setVizDigits]  = useState(true);
@@ -57,16 +58,23 @@ export default function PasswordEvaluation() {
     const val = e.target.value.slice(0, 128);
     setPassword(val);
     setResult(val ? evaluatePassword(val) : null);
+    setCopied(false);
   }, []);
 
+  // Fix #2 — proper copy button with icon + state
   const handleCopy = () => {
     if (!password) return;
-    navigator.clipboard.writeText(password).then(() => showToast('Password copied', 'success'));
+    navigator.clipboard.writeText(password).then(() => {
+      setCopied(true);
+      showToast('Password copied', 'success');
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
-  // Entropy visualizer calculation
+  // Fix #11 — entropy visualizer vars
   const vizCharsetSize = (vizUpper ? 26 : 0) + (vizLower ? 26 : 0) + (vizDigits ? 10 : 0) + (vizSymbols ? 33 : 0);
-  const bitsPerChar = vizCharsetSize > 0 ? Math.log2(vizCharsetSize) : 0;
+  const bitsPerChar    = vizCharsetSize > 0 ? Math.log2(vizCharsetSize) : 0;
+  const vizEmpty       = vizCharsetSize === 0;
 
   const StrengthIcon = result ? STRENGTH_ICONS[result.strengthIndex] : null;
 
@@ -108,13 +116,22 @@ export default function PasswordEvaluation() {
             style={{ WebkitTextSecurity: showPw ? 'none' : 'disc' }}
           />
           <div className="eval__input-btns">
-            <button className="eval__input-btn" onClick={() => setShowPw(v => !v)} aria-label={showPw ? 'Hide' : 'Show'}>
+            <button
+              className="eval__input-btn"
+              onClick={() => setShowPw(v => !v)}
+              aria-label={showPw ? 'Hide password' : 'Show password'}
+            >
               {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
+            {/* Fix #2 — proper Copy icon with copied state */}
             {password && (
-              <button className="eval__input-btn" onClick={handleCopy} aria-label="Copy">
-                <Info size={16} style={{ display:'none' }} />
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', fontWeight: 700 }}>COPY</span>
+              <button
+                className={`eval__input-btn ${copied ? 'eval__input-btn--copied' : ''}`}
+                onClick={handleCopy}
+                aria-label="Copy password"
+                title="Copy"
+              >
+                {copied ? <Check size={16} /> : <Copy size={16} />}
               </button>
             )}
           </div>
@@ -142,14 +159,26 @@ export default function PasswordEvaluation() {
                 </div>
               </div>
             </div>
-            <div className="eval__seg-bar">
-              <div className="eval__seg-row">
+
+            {/* Fix #16 — accessible strength bar */}
+            <div
+              className="eval__seg-bar"
+              role="meter"
+              aria-label={`Password strength: ${result.strength} (${result.strengthIndex + 1} of 5)`}
+              aria-valuenow={result.strengthIndex + 1}
+              aria-valuemin={1}
+              aria-valuemax={5}
+            >
+              <div className="eval__seg-row" aria-hidden="true">
                 {[0,1,2,3,4].map(i => (
-                  <div key={i} className={`eval__seg ${i <= result.strengthIndex ? 'eval__seg--filled' : ''}`}
-                    style={{ '--seg-c': i <= result.strengthIndex ? result.color : undefined }} />
+                  <div
+                    key={i}
+                    className={`eval__seg ${i <= result.strengthIndex ? 'eval__seg--filled' : ''}`}
+                    style={{ '--seg-c': i <= result.strengthIndex ? result.color : undefined }}
+                  />
                 ))}
               </div>
-              <div className="eval__seg-labels">
+              <div className="eval__seg-labels" aria-hidden="true">
                 {['Very Weak','Weak','Fair','Strong','Very Strong'].map(l => <span key={l}>{l}</span>)}
               </div>
             </div>
@@ -180,7 +209,7 @@ export default function PasswordEvaluation() {
             <div className="eval__checklist">
               {Object.entries(result.inclusions).map(([key, { pass, label }]) => (
                 <div key={key} className={`eval__check-item ${pass ? 'eval__check-item--pass' : 'eval__check-item--fail'}`}>
-                  <span className="eval__check-icon">{pass ? '✓' : '✗'}</span>
+                  <span className="eval__check-icon" aria-hidden="true">{pass ? '✓' : '✗'}</span>
                   <span className="eval__check-label">{label}</span>
                 </div>
               ))}
@@ -206,7 +235,7 @@ export default function PasswordEvaluation() {
           {result.suggestions.length > 0 && (
             <section className="eval__section">
               <h2 className="eval__section-title"><Info size={15} /> Suggestions</h2>
-              <ul className="eval__suggestions">
+              <ul className="eval__suggestions" role="list">
                 {result.suggestions.map((s, i) => (
                   <li key={i} className="eval__suggestion">{s}</li>
                 ))}
@@ -216,14 +245,19 @@ export default function PasswordEvaluation() {
 
           {/* ── Score Breakdown (collapsible) ── */}
           <section className="eval__section eval__section--collapsible">
-            <button className="eval__breakdown-toggle" onClick={() => setShowBreakdown(v => !v)}>
+            <button
+              className="eval__breakdown-toggle"
+              onClick={() => setShowBreakdown(v => !v)}
+              aria-expanded={showBreakdown}
+              aria-controls="eval-breakdown-body"
+            >
               <span className="eval__section-title" style={{ margin: 0 }}>
                 <Zap size={15} /> How was this score calculated?
               </span>
               {showBreakdown ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </button>
             {showBreakdown && (
-              <div className="eval__breakdown">
+              <div id="eval-breakdown-body" className="eval__breakdown">
                 <div className="eval__breakdown-row">
                   <span>Password length</span>
                   <span className="eval__breakdown-val">{result.length} characters</span>
@@ -273,20 +307,20 @@ export default function PasswordEvaluation() {
         </div>
       )}
 
-      {/* ── Entropy Visualizer (always visible) ── */}
+      {/* ── Entropy Visualizer ── */}
       <section className="eval__viz">
         <div className="eval__viz-header">
           <h2 className="eval__section-title" style={{ margin: 0 }}><Info size={15} /> Entropy Visualizer</h2>
-          <p className="eval__viz-sub">See how character sets affect password strength. Interactive — no actual password needed.</p>
+          <p className="eval__viz-sub">See how character sets affect strength. No password needed.</p>
         </div>
 
         <div className="eval__viz-controls">
           {[
-            ['Uppercase A–Z (+26)', vizUpper, setVizUpper, 26],
-            ['Lowercase a–z (+26)', vizLower, setVizLower, 26],
-            ['Numbers 0–9 (+10)',   vizDigits, setVizDigits, 10],
-            ['Symbols (+33)',       vizSymbols, setVizSymbols, 33],
-          ].map(([label, val, setter, count]) => (
+            ['Uppercase A–Z (+26)', vizUpper,   setVizUpper],
+            ['Lowercase a–z (+26)', vizLower,   setVizLower],
+            ['Numbers 0–9 (+10)',   vizDigits,  setVizDigits],
+            ['Symbols (+33)',       vizSymbols, setVizSymbols],
+          ].map(([label, val, setter]) => (
             <label key={label} className="eval__viz-toggle">
               <input type="checkbox" checked={val} onChange={() => setter(v => !v)} />
               <span className="eval__viz-track"><span className="eval__viz-thumb" /></span>
@@ -295,39 +329,47 @@ export default function PasswordEvaluation() {
           ))}
         </div>
 
-        <div className="eval__viz-stats">
-          <div className="eval__viz-stat">
-            <span className="eval__viz-stat-val">{vizCharsetSize}</span>
-            <span className="eval__viz-stat-label">Charset size</span>
+        {/* Fix #11 — show message when no charset selected */}
+        {vizEmpty ? (
+          <div className="eval__viz-empty">
+            Select at least one character type to see entropy estimates.
           </div>
-          <div className="eval__viz-stat">
-            <span className="eval__viz-stat-val">{bitsPerChar.toFixed(2)}</span>
-            <span className="eval__viz-stat-label">Bits per character</span>
-          </div>
-        </div>
-
-        <div className="eval__viz-table">
-          <div className="eval__viz-table-head">
-            <span>Length</span>
-            <span>Total entropy</span>
-            <span>Offline (bcrypt)</span>
-            <span>Strength</span>
-          </div>
-          {VIZ_PRESETS.map(len => {
-            const ent = len * bitsPerChar;
-            const crackSec = Math.pow(2, ent) / 1e4;
-            const formatted = formatVizTime(crackSec);
-            const [str, col] = getVizStrength(ent);
-            return (
-              <div key={len} className="eval__viz-table-row">
-                <span className="eval__viz-len">{len} chars</span>
-                <span className="eval__viz-ent mono">{ent.toFixed(1)} bits</span>
-                <span className="eval__viz-crack" style={{ color: col }}>{formatted}</span>
-                <span className="eval__viz-str" style={{ color: col }}>{str}</span>
+        ) : (
+          <>
+            <div className="eval__viz-stats">
+              <div className="eval__viz-stat">
+                <span className="eval__viz-stat-val">{vizCharsetSize}</span>
+                <span className="eval__viz-stat-label">Charset size</span>
               </div>
-            );
-          })}
-        </div>
+              <div className="eval__viz-stat">
+                <span className="eval__viz-stat-val">{bitsPerChar.toFixed(2)}</span>
+                <span className="eval__viz-stat-label">Bits per character</span>
+              </div>
+            </div>
+
+            <div className="eval__viz-table" role="table" aria-label="Entropy by password length">
+              <div className="eval__viz-table-head" role="row">
+                <span role="columnheader">Length</span>
+                <span role="columnheader">Total entropy</span>
+                <span role="columnheader">Offline (bcrypt)</span>
+                <span role="columnheader">Strength</span>
+              </div>
+              {VIZ_PRESETS.map(len => {
+                const ent = len * bitsPerChar;
+                const crackSec = Math.pow(2, ent) / 1e4;
+                const [str, col] = getVizStrength(ent);
+                return (
+                  <div key={len} className="eval__viz-table-row" role="row">
+                    <span className="eval__viz-len" role="cell">{len} chars</span>
+                    <span className="eval__viz-ent mono" role="cell">{ent.toFixed(1)} bits</span>
+                    <span className="eval__viz-crack" style={{ color: col }} role="cell">{formatVizTime(crackSec)}</span>
+                    <span className="eval__viz-str" style={{ color: col }} role="cell">{str}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </section>
 
       {!password && (
@@ -349,10 +391,10 @@ function formatVizTime(seconds) {
   if (seconds < 86400)   return `${Math.round(seconds/3600)}hrs`;
   if (seconds < 2592000) return `${Math.round(seconds/86400)}days`;
   if (seconds < 31536000) return `${Math.round(seconds/2592000)}mo`;
-  const y = seconds / 31536000;
-  if (y < 1e3)  return `${Math.round(y)}yrs`;
-  if (y < 1e6)  return `${(y/1e3).toFixed(0)}K yrs`;
-  if (y < 1e9)  return `${(y/1e6).toFixed(0)}M yrs`;
+  const y = seconds/31536000;
+  if (y < 1e3) return `${Math.round(y)}yrs`;
+  if (y < 1e6) return `${(y/1e3).toFixed(0)}K yrs`;
+  if (y < 1e9) return `${(y/1e6).toFixed(0)}M yrs`;
   return 'Centuries';
 }
 
